@@ -1,7 +1,7 @@
 const { Bot } = require('grammy');
 require('dotenv').config();
 
-const bot = new Bot(process.env.BOT_TOKEN);
+const bot = new Bot(process.env.BOT_API_TOKEN);
 
 async function deleteWebhook() {
   try {
