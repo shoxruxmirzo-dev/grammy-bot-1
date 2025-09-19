@@ -1,6 +1,14 @@
-require('dotenv').config();
-const { Bot, GrammyError, HttpError, Keyboard, InlineKeyboard } = require('grammy');
+const express = require('express');
+const {
+  Bot,
+  webhookCallback,
+  GrammyError,
+  HttpError,
+  Keyboard,
+  InlineKeyboard,
+} = require('grammy');
 const { getRandomQuestion } = require('./utils.js');
+require('dotenv').config();
 
 const bot = new Bot(process.env.BOT_API_TOKEN);
 
@@ -56,4 +64,21 @@ bot.catch((err) => {
   }
 });
 
-bot.start();
+// Проверка окружения
+if (process.env.NODE_ENV === 'production') {
+  // Railway = webhook
+  const app = express();
+
+  // Webhook middleware от grammy
+  app.use(express.json());
+  app.use('/webhook', webhookCallback(bot, 'express'));
+
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
+    console.log(`✅ Webhook сервер запущен на порту ${port}`);
+  });
+} else {
+  // Локально = polling
+  bot.start();
+  console.log('✅ Бот запущен локально через polling');
+}
